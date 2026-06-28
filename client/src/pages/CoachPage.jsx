@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import axios from 'axios'
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
 // Keyframe injection
 const ANIM = `
   @keyframes dot-bounce { 0%,60%,100%{opacity:0.15;transform:scale(0.85)} 30%{opacity:1;transform:scale(1)} }
@@ -325,7 +327,7 @@ export default function CoachPage() {
     setLoading(true)
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/coach/message', {
+      const { data } = await axios.post(`${API}/api/coach/message`, {
         message: msg,
         context,
         conversationHistory: messages,

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
 // Keyframe injection for spinner
 const ANIM = `
   @keyframes ironsync-spin { to { transform: rotate(360deg); } }
@@ -172,7 +174,7 @@ export default function WorkoutForm() {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:5000/api/ai/generate-workout', form)
+      const res = await axios.post(`${API}/api/ai/generate-workout`, form)
       navigate('/workout-result', { state: { workout: res.data.workout, form } })
     } catch {
       setErrors({ submit: 'Could not reach the server. Make sure the backend is running on port 5000.' })
