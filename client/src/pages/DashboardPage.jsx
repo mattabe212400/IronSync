@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import MetricCard from '../components/MetricCard'
+import { useAuth } from '../context/AuthContext'
 import {
   getWorkoutPlans,
   getCompletedWorkouts,
   markWorkoutComplete,
-  DEMO_USER_ID,
 } from '../services/workoutService'
 
 // ─── Saved plan card ──────────────────────────────────────────────────────────
 
-function PlanCard({ plan, onSessionLogged }) {
+function PlanCard({ plan, userId, onSessionLogged }) {
   const navigate = useNavigate()
   const [loggingDay, setLoggingDay] = useState(null)   // label of day being logged
   const [loggedDays, setLoggedDays] = useState({})     // { dayLabel: true }
@@ -23,7 +23,7 @@ function PlanCard({ plan, onSessionLogged }) {
     setLoggingDay(day.label)
     setLogError(null)
     try {
-      await markWorkoutComplete(plan.id, day.label, day.focus)
+      await markWorkoutComplete(plan.id, day.label, day.focus, [], '', userId)
       setLoggedDays(prev => ({ ...prev, [day.label]: true }))
       onSessionLogged?.()
     } catch (err) {
@@ -161,6 +161,7 @@ function EmptyPlans() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const [plans,     setPlans]     = useState([])
   const [completed, setCompleted] = useState([])
   const [loading,   setLoading]   = useState(true)
@@ -169,8 +170,8 @@ export default function DashboardPage() {
   async function loadData() {
     try {
       const [p, c] = await Promise.all([
-        getWorkoutPlans(DEMO_USER_ID),
-        getCompletedWorkouts(DEMO_USER_ID),
+        getWorkoutPlans(user.uid),
+        getCompletedWorkouts(user.uid),
       ])
       setPlans(p)
       setCompleted(c)
@@ -186,7 +187,7 @@ export default function DashboardPage() {
 
   // Refresh completed count after a session is logged
   async function handleSessionLogged() {
-    const c = await getCompletedWorkouts(DEMO_USER_ID).catch(() => completed)
+    const c = await getCompletedWorkouts(user.uid).catch(() => completed)
     setCompleted(c)
   }
 
@@ -271,7 +272,7 @@ export default function DashboardPage() {
           gap: '14px',
         }}>
           {plans.map(plan => (
-            <PlanCard key={plan.id} plan={plan} onSessionLogged={handleSessionLogged} />
+            <PlanCard key={plan.id} plan={plan} userId={user.uid} onSessionLogged={handleSessionLogged} />
           ))}
         </div>
       )}

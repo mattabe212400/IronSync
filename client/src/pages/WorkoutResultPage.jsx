@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { saveWorkoutPlan } from '../services/workoutService'
+import { useAuth } from '../context/AuthContext'
 
 // ─── Small display components ────────────────────────────────────────────────
 
@@ -123,6 +124,7 @@ function GhostButton({ children, disabled, onClick, title }) {
 export default function WorkoutResultPage() {
   const { state } = useLocation()
   const navigate  = useNavigate()
+  const { user }  = useAuth()
 
   const [saving,    setSaving]    = useState(false)
   const [saved,     setSaved]     = useState(false)
@@ -134,7 +136,7 @@ export default function WorkoutResultPage() {
     setSaving(true)
     setSaveError(null)
     try {
-      const id = await saveWorkoutPlan(workout, state?.form)
+      const id = await saveWorkoutPlan(workout, state?.form, user.uid)
       setPlanId(id)
       setSaved(true)
     } catch (err) {

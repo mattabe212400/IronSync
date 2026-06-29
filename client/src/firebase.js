@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
+import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 
 // All config values come from VITE_ environment variables — never hardcode keys here.
 // Copy client/.env.example to client/.env and fill in your Firebase project values.
@@ -13,4 +14,6 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
-export const db = getFirestore(app)
+export const db             = getFirestore(app)
+export const auth           = getAuth(app)
+export const googleProvider = new GoogleAuthProvider()

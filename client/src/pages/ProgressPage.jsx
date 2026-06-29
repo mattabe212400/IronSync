@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import MetricCard from '../components/MetricCard'
-import { getProgressSummary, DEMO_USER_ID } from '../services/workoutService'
+import { getProgressSummary } from '../services/workoutService'
+import { useAuth } from '../context/AuthContext'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -273,19 +274,20 @@ const SKELETON_ANIM = `@keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }`
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProgressPage() {
+  const { user } = useAuth()
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
 
   useEffect(() => {
-    getProgressSummary(DEMO_USER_ID)
+    getProgressSummary(user.uid)
       .then(setSummary)
       .catch(err => {
         setError('Failed to load progress data. Check your Firebase configuration.')
         console.error('[Progress]', err)
       })
       .finally(() => setLoading(false))
-  }, [])
+  }, [user.uid])
 
   const weeklyActivity     = summary?.weeklyActivity     ?? Array(7).fill(0).map((_, i) => ({ day: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i], done: false, isFuture: false }))
   const activeDaysThisWeek = summary?.activeDaysThisWeek ?? 0

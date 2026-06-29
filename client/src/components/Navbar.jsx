@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const navLinks = [
   { label: 'Home',      path: '/'          },
@@ -23,6 +24,7 @@ export default function Navbar() {
   const location  = useLocation()
   const isMobile  = useIsMobile()
   const [open, setOpen] = useState(false)
+  const { user, logout } = useAuth()
 
   // Close menu on route change
   useEffect(() => setOpen(false), [location.pathname])
@@ -77,6 +79,25 @@ export default function Navbar() {
             </div>
           )}
 
+          {/* Desktop: user avatar + sign out */}
+          {!isMobile && user && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '8px', paddingLeft: '16px', borderLeft: '1px solid #292524' }}>
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="avatar" referrerPolicy="no-referrer" style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #292524' }} />
+              ) : (
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+                  {user.displayName?.[0]?.toUpperCase() || '?'}
+                </div>
+              )}
+              <button
+                onClick={logout}
+                style={{ background: 'none', border: '1px solid #292524', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer', color: '#78716c', fontSize: '12px', fontWeight: 600 }}
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
+
           {/* Mobile hamburger */}
           {isMobile && (
             <button
@@ -117,6 +138,26 @@ export default function Navbar() {
                 </Link>
               )
             })}
+
+            {/* Mobile sign out */}
+            {user && (
+              <>
+                <div style={{ height: '1px', backgroundColor: '#292524', margin: '4px 0' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px' }}>
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="avatar" referrerPolicy="no-referrer" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
+                  ) : (
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#fff' }}>
+                      {user.displayName?.[0]?.toUpperCase() || '?'}
+                    </div>
+                  )}
+                  <span style={{ fontSize: '13px', color: '#6b7280', flex: 1 }}>{user.displayName || user.email}</span>
+                  <button onClick={logout} style={{ background: 'none', border: '1px solid #292524', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer', color: '#78716c', fontSize: '12px', fontWeight: 600 }}>
+                    Sign Out
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </nav>
