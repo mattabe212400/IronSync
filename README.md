@@ -158,7 +158,6 @@ IronSync routes messages to one of four specialized agents based on keyword inte
 
 All agents share the same Gemini interface. Switching to Claude requires only changing `AI_PROVIDER=claude` in `.env`.
 
-See **[docs/ai-architecture.md](docs/ai-architecture.md)** for the full technical breakdown: provider router, Gemini integration details, conversation memory design, JSON validation layer, and how to add new agents or providers.
 
 ---
 
@@ -200,9 +199,7 @@ IronSync Project/
 │   │   └── validateResponse.js      # AI response validation + safe defaults
 │   ├── server.js
 │   └── .env.example
-│
-└── docs/
-    └── ai-architecture.md           # Full AI design documentation
+└── 
 ```
 
 ---
