@@ -10,7 +10,7 @@ import CoachPage from './pages/CoachPage'
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen" style={{ backgroundColor: '#0d0e11', color: '#c8cdd8' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#0c0b0b', color: '#d6d3d1' }}>
         <Navbar />
         <Routes>
           <Route path="/" element={<LandingPage />} />
