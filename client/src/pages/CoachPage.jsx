@@ -4,16 +4,24 @@ import axios from 'axios'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// Keyframe injection
 const ANIM = `
   @keyframes dot-bounce { 0%,60%,100%{opacity:0.15;transform:scale(0.85)} 30%{opacity:1;transform:scale(1)} }
+  @keyframes slideIn { from { transform: translateX(100%) } to { transform: translateX(0) } }
   .coach-dot { animation: dot-bounce 1.4s ease-in-out infinite; }
   textarea::placeholder { color: #374151; }
   textarea:focus { outline: none; border-color: rgba(0,212,255,0.3) !important; }
   .prompt-chip:hover { background: rgba(255,255,255,0.07) !important; color: #9ca3af !important; }
 `
 
-// ─── Static data ─────────────────────────────────────────────────────────────
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 768)
+  useEffect(() => {
+    const fn = () => setMobile(window.innerWidth < 768)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
+  return mobile
+}
 
 const GREETING = {
   id: 'greeting',
@@ -34,8 +42,6 @@ const SUGGESTED = [
   { label: '🤔 Explain exercise',  text: 'Explain why Romanian Deadlifts are in my program' },
 ]
 
-// ─── Message sub-components ──────────────────────────────────────────────────
-
 function UserBubble({ msg }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '14px' }}>
@@ -55,7 +61,6 @@ function UserBubble({ msg }) {
 function AiBubble({ msg }) {
   return (
     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'flex-start' }}>
-      {/* Avatar */}
       <div style={{
         width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
         background: 'linear-gradient(135deg, #00d4ff 0%, #00ff88 100%)',
@@ -66,7 +71,6 @@ function AiBubble({ msg }) {
       </div>
 
       <div style={{ maxWidth: '88%', minWidth: 0 }}>
-        {/* Main response bubble */}
         <div style={{
           padding: '14px 16px',
           backgroundColor: '#16181e',
@@ -76,7 +80,6 @@ function AiBubble({ msg }) {
         }}>
           {msg.content}
 
-          {/* Workout updated notice */}
           {msg.updatedWorkout && (
             <div style={{
               marginTop: '12px', padding: '8px 12px',
@@ -90,7 +93,6 @@ function AiBubble({ msg }) {
           )}
         </div>
 
-        {/* Recommendations */}
         {msg.recommendations?.length > 0 && (
           <div style={{
             marginTop: '6px', padding: '10px 14px',
@@ -111,11 +113,10 @@ function AiBubble({ msg }) {
           </div>
         )}
 
-        {/* Agent badge */}
         {msg.agentUsed && msg.agentUsed !== 'workout' && (
           <div style={{ marginTop: '5px', fontSize: '10px', color: '#374151', paddingLeft: '4px' }}>
-            {msg.agentUsed === 'swap' && '🔄 Exercise Swap Agent'}
-            {msg.agentUsed === 'recovery' && '🩹 Recovery Agent'}
+            {msg.agentUsed === 'swap'        && '🔄 Exercise Swap Agent'}
+            {msg.agentUsed === 'recovery'    && '🩹 Recovery Agent'}
             {msg.agentUsed === 'progression' && '📈 Progression Agent'}
           </div>
         )}
@@ -150,7 +151,7 @@ function EmptyState() {
         No workout plan loaded
       </p>
       <p style={{ margin: '0 0 14px', fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
-        Generate a plan first for full coaching features,<br />or just ask me anything to get started.
+        Generate a plan first for full coaching features, or just ask me anything.
       </p>
       <a href="/generate" style={{
         display: 'inline-block', padding: '7px 16px',
@@ -193,23 +194,10 @@ function TypingDots() {
   )
 }
 
-// ─── Context Panel ───────────────────────────────────────────────────────────
-
-function ContextPanel({ context }) {
+function ContextPanelContent({ context }) {
   const { workout, goal, experience, equipment, limitations } = context
-
   return (
-    <div style={{
-      width: '272px', flexShrink: 0,
-      overflowY: 'auto', padding: '20px 16px',
-      borderLeft: '1px solid #1a1c24',
-      backgroundColor: '#0b0c0f',
-    }}>
-      <p style={{ margin: '0 0 18px', fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.9px' }}>
-        Context
-      </p>
-
-      {/* Current Plan */}
+    <>
       <div style={{ marginBottom: '18px' }}>
         <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           Current Plan
@@ -237,7 +225,6 @@ function ContextPanel({ context }) {
                 }}>{tag}</span>
               ))}
             </div>
-            {/* Day list */}
             {workout.weeklySchedule?.map((d, i) => (
               <div key={i} style={{ fontSize: '11px', color: '#4b5563', marginBottom: '2px', lineHeight: 1.5 }}>
                 <span style={{ color: '#6b7280', fontWeight: 600 }}>{d.label}: </span>
@@ -256,7 +243,6 @@ function ContextPanel({ context }) {
         )}
       </div>
 
-      {/* Profile */}
       <div>
         <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           Profile
@@ -288,17 +274,15 @@ function ContextPanel({ context }) {
           ))}
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
-// ─── Main Page ───────────────────────────────────────────────────────────────
-
 export default function CoachPage() {
-  const location = useLocation()
+  const location  = useLocation()
+  const isMobile  = useIsMobile()
+  const [showContext, setShowContext] = useState(false)
 
-  // Seed context from WorkoutResultPage navigation if available.
-  // planId is set when the user saved the plan before clicking "Chat with Coach".
   const [context, setContext] = useState({
     workout:     location.state?.workout          || null,
     planId:      location.state?.planId           || null,
@@ -317,6 +301,9 @@ export default function CoachPage() {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Close drawer when switching to desktop
+  useEffect(() => { if (!isMobile) setShowContext(false) }, [isMobile])
+
   const send = async (text) => {
     const msg = (text ?? input).trim()
     if (!msg || loading) return
@@ -334,7 +321,7 @@ export default function CoachPage() {
       })
 
       const aiMsg = {
-        id: Date.now() + 1,
+        id:              Date.now() + 1,
         role:            'assistant',
         content:         data.response,
         reasoning:       data.reasoning,
@@ -374,37 +361,95 @@ export default function CoachPage() {
   return (
     <>
       <style>{ANIM}</style>
+
+      {/* Mobile context drawer overlay */}
+      {isMobile && showContext && (
+        <div
+          onClick={() => setShowContext(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            backgroundColor: 'rgba(0,0,0,0.65)',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'absolute', right: 0, top: 0, bottom: 0,
+              width: '300px', maxWidth: '85vw',
+              backgroundColor: '#0b0c0f',
+              borderLeft: '1px solid #1a1c24',
+              overflowY: 'auto', padding: '20px 16px',
+              animation: 'slideIn 0.22s ease',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.9px' }}>
+                Context
+              </p>
+              <button
+                onClick={() => setShowContext(false)}
+                style={{ background: 'none', border: 'none', color: '#78716c', cursor: 'pointer', fontSize: '18px', lineHeight: 1, padding: '2px' }}
+              >
+                ✕
+              </button>
+            </div>
+            <ContextPanelContent context={context} />
+          </div>
+        </div>
+      )}
+
       <div style={{
-        height: 'calc(100vh - 64px)',
+        height: 'calc(100vh - 60px)',
         display: 'flex',
         overflow: 'hidden',
         backgroundColor: '#0d0e11',
       }}>
 
-        {/* ── Left: Chat area ──────────────────────────────── */}
+        {/* Chat area */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
-          {/* Page header */}
+          {/* Header */}
           <div style={{
-            padding: '16px 24px',
+            padding: isMobile ? '12px 16px' : '16px 24px',
             borderBottom: '1px solid #1a1c24',
-            display: 'flex', alignItems: 'center', gap: '10px',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: '10px',
           }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #00d4ff, #00ff88)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
-            }}>
-              🤖
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(135deg, #00d4ff, #00ff88)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+              }}>
+                🤖
+              </div>
+              <div>
+                <h1 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#ffffff' }}>IronSync Coach</h1>
+                <p style={{ margin: 0, fontSize: '12px', color: '#4b5563' }}>AI fitness agent · Gemini</p>
+              </div>
             </div>
-            <div>
-              <h1 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#ffffff' }}>IronSync Coach</h1>
-              <p style={{ margin: 0, fontSize: '12px', color: '#4b5563' }}>AI fitness agent · Powered by Gemini</p>
-            </div>
+
+            {/* Context toggle — mobile only */}
+            {isMobile && (
+              <button
+                onClick={() => setShowContext(true)}
+                style={{
+                  flexShrink: 0,
+                  padding: '7px 12px',
+                  backgroundColor: 'rgba(0,212,255,0.07)',
+                  border: '1px solid rgba(0,212,255,0.18)',
+                  borderRadius: '8px', cursor: 'pointer',
+                  fontSize: '12px', fontWeight: 600, color: '#00d4ff',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Context
+              </button>
+            )}
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 12px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px 14px 8px' : '20px 24px 12px' }}>
             {messages.map(m => {
               if (m.role === 'user')           return <UserBubble   key={m.id} msg={m} />
               if (m.role === 'system-error')   return <SystemBubble key={m.id} msg={m} variant="error" />
@@ -418,7 +463,7 @@ export default function CoachPage() {
 
           {/* Suggested prompts */}
           <div style={{
-            padding: '8px 24px 10px',
+            padding: isMobile ? '6px 14px 8px' : '8px 24px 10px',
             display: 'flex', gap: '6px', overflowX: 'auto',
             scrollbarWidth: 'none',
           }}>
@@ -442,20 +487,20 @@ export default function CoachPage() {
             ))}
           </div>
 
-          {/* Input area */}
+          {/* Input */}
           <div style={{
-            padding: '10px 24px 20px',
+            padding: isMobile ? '8px 14px 16px' : '10px 24px 20px',
             borderTop: '1px solid #1a1c24',
-            display: 'flex', gap: '10px', alignItems: 'flex-end',
+            display: 'flex', gap: '8px', alignItems: 'flex-end',
           }}>
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder="Ask your coach anything... (Enter to send, Shift+Enter for new line)"
+              placeholder={isMobile ? 'Ask your coach...' : 'Ask your coach anything... (Enter to send, Shift+Enter for new line)'}
               rows={2}
               style={{
-                flex: 1, padding: '12px 16px',
+                flex: 1, padding: '12px 14px',
                 backgroundColor: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '14px', color: '#e5e7eb',
@@ -468,7 +513,8 @@ export default function CoachPage() {
               onClick={() => send()}
               disabled={!input.trim() || loading}
               style={{
-                padding: '12px 20px', fontWeight: 700, fontSize: '14px',
+                padding: isMobile ? '12px 14px' : '12px 20px',
+                fontWeight: 700, fontSize: '14px',
                 borderRadius: '12px', border: 'none', flexShrink: 0,
                 cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
                 transition: 'all 0.2s',
@@ -477,13 +523,25 @@ export default function CoachPage() {
                 boxShadow: input.trim() && !loading ? '0 0 20px rgba(0,212,255,0.18)' : 'none',
               }}
             >
-              Send →
+              {isMobile ? '→' : 'Send →'}
             </button>
           </div>
         </div>
 
-        {/* ── Right: Context panel ─────────────────────────── */}
-        <ContextPanel context={context} />
+        {/* Desktop context sidebar */}
+        {!isMobile && (
+          <div style={{
+            width: '272px', flexShrink: 0,
+            overflowY: 'auto', padding: '20px 16px',
+            borderLeft: '1px solid #1a1c24',
+            backgroundColor: '#0b0c0f',
+          }}>
+            <p style={{ margin: '0 0 18px', fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.9px' }}>
+              Context
+            </p>
+            <ContextPanelContent context={context} />
+          </div>
+        )}
       </div>
     </>
   )

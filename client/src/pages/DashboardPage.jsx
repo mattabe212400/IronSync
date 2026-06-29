@@ -208,9 +208,9 @@ export default function DashboardPage() {
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 24px' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', marginBottom: '32px' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: '30px', fontWeight: 900, color: '#ffffff' }}>Your Dashboard</h1>
+          <h1 style={{ margin: 0, fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 900, color: '#ffffff' }}>Your Dashboard</h1>
           <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '15px' }}>Track your fitness journey</p>
         </div>
         <Link to="/generate" style={{
@@ -218,6 +218,7 @@ export default function DashboardPage() {
           backgroundColor: '#00d4ff', color: '#000000',
           fontWeight: 700, fontSize: '14px',
           borderRadius: '12px', textDecoration: 'none',
+          whiteSpace: 'nowrap',
         }}>
           + New Workout
         </Link>
@@ -266,7 +267,7 @@ export default function DashboardPage() {
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))',
           gap: '14px',
         }}>
           {plans.map(plan => (
