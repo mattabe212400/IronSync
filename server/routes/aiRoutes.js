@@ -40,8 +40,11 @@ router.post('/generate-workout', async (req, res) => {
 
     res.json(response)
   } catch (err) {
+    if (err.code === 'RATE_LIMITED') {
+      return res.status(429).json({ success: false, error: "Gemini's free tier limit has been reached. Please wait a minute and try again." })
+    }
     console.error('Workout generation error:', err.message)
-    res.status(500).json({ success: false, error: 'Failed to generate workout. Check server logs.' })
+    res.status(500).json({ success: false, error: 'Failed to generate workout. Please try again.' })
   }
 })
 

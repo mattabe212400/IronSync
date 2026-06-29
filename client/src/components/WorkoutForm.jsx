@@ -176,8 +176,14 @@ export default function WorkoutForm() {
     try {
       const res = await axios.post(`${API}/api/ai/generate-workout`, form)
       navigate('/workout-result', { state: { workout: res.data.workout, form } })
-    } catch {
-      setErrors({ submit: 'Could not reach the server. Make sure the backend is running on port 5000.' })
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setErrors({ submit: "Gemini's free tier limit has been reached. Please wait a minute and try again." })
+      } else if (!err.response) {
+        setErrors({ submit: 'Could not reach the server. Make sure the backend is running.' })
+      } else {
+        setErrors({ submit: err.response?.data?.error || 'Something went wrong. Please try again.' })
+      }
       setLoading(false)
     }
   }

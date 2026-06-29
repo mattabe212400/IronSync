@@ -60,6 +60,15 @@ router.post('/message', async (req, res) => {
 
     res.json({ ...validateCoachResponse(result), agentUsed: agentType })
   } catch (err) {
+    if (err.code === 'RATE_LIMITED') {
+      return res.status(429).json({
+        response: "Gemini's free tier limit has been reached. Please wait a minute and try again.",
+        updatedWorkout: null,
+        reasoning: '',
+        recommendations: [],
+        agentUsed: agentType,
+      })
+    }
     console.error('[Coach] Agent error:', err.message)
     res.status(500).json({
       response: "I ran into an issue processing that. Please try again in a moment.",

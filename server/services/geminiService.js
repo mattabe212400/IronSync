@@ -31,10 +31,19 @@ const geminiService = {
   // Single-shot prompt → JSON (used by workout generator)
   async generateWorkout(preferences) {
     const prompt = buildWorkoutPrompt(preferences)
-    const res = await axios.post(`${BASE}:generateContent?key=${apiKey()}`, {
-      contents: [{ parts: [{ text: prompt }] }],
-    })
-    return parseJSON(res.data.candidates[0].content.parts[0].text)
+    try {
+      const res = await axios.post(`${BASE}:generateContent?key=${apiKey()}`, {
+        contents: [{ parts: [{ text: prompt }] }],
+      })
+      return parseJSON(res.data.candidates[0].content.parts[0].text)
+    } catch (axiosErr) {
+      if (axiosErr.response?.status === 429) {
+        const err = new Error('Gemini free tier rate limit reached')
+        err.code = 'RATE_LIMITED'
+        throw err
+      }
+      throw axiosErr
+    }
   },
 
   // Multi-turn chat with a system prompt (used by AI Coach agents)
@@ -60,6 +69,11 @@ const geminiService = {
         contents,
       })
     } catch (axiosErr) {
+      if (axiosErr.response?.status === 429) {
+        const err = new Error('Gemini free tier rate limit reached')
+        err.code = 'RATE_LIMITED'
+        throw err
+      }
       const status = axiosErr.response?.status
       const detail = JSON.stringify(axiosErr.response?.data)
       console.error(`[Gemini] HTTP ${status}:`, detail)
