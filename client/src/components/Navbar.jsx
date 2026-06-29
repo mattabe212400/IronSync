@@ -17,7 +17,7 @@ export default function Navbar() {
       top: 0,
       zIndex: 50,
       borderBottom: '1px solid #292524',
-      backgroundColor: 'rgba(12,11,11,0.95)',
+      backgroundColor: 'rgba(6,8,16,0.97)',
       backdropFilter: 'blur(12px)',
     }}>
       <div style={{
