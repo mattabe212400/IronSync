@@ -1,6 +1,7 @@
-const express = require('express')
-const cors = require('cors')
-const dotenv = require('dotenv')
+const express   = require('express')
+const cors      = require('cors')
+const dotenv    = require('dotenv')
+const rateLimit = require('express-rate-limit')
 
 // Load .env variables (PORT, AI_PROVIDER, API keys)
 dotenv.config()
@@ -26,7 +27,18 @@ app.use(cors({
 }))
 app.use(express.json())   // Parse JSON request bodies
 
+// --- Rate limiting ---
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30,                   // 30 AI requests per IP per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests — please wait a few minutes and try again.' },
+})
+
 // --- Routes ---
+app.use('/api/ai',    aiLimiter)
+app.use('/api/coach', aiLimiter)
 app.use('/api/ai', aiRoutes)
 app.use('/api/workouts', workoutRoutes)
 app.use('/api/coach', coachRoutes)
