@@ -13,7 +13,17 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 // --- Middleware ---
-app.use(cors())           // Allow requests from the React frontend
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'https://iron-sync.vercel.app',
+]
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (curl, Postman, health checks)
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true)
+    cb(new Error(`CORS: origin ${origin} not allowed`))
+  },
+}))
 app.use(express.json())   // Parse JSON request bodies
 
 // --- Routes ---
