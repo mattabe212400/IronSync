@@ -1,8 +1,10 @@
 # IronSync
 
-**AI-powered fitness agent** — generate personalized workout plans and chat with a multi-agent AI coach.
+**Full-stack AI fitness agent** — generate personalized workout plans, chat with a multi-agent AI coach, and track your training progress.
 
-Built as a full-stack portfolio project demonstrating agent architecture, structured AI outputs, and a dark fitness-tech UI.
+Built as a portfolio project demonstrating agent architecture, structured AI outputs, Firebase integration, and a mobile-responsive dark UI.
+
+**Live demo:** [iron-sync.vercel.app](https://iron-sync.vercel.app)
 
 ---
 
@@ -25,7 +27,7 @@ Built as a full-stack portfolio project demonstrating agent architecture, struct
 |-------|-----------|
 | Frontend | React 18, Vite, Tailwind CSS v4 |
 | Backend | Node.js, Express |
-| AI Provider | Gemini 1.5 Flash (Claude integration ready) |
+| AI Provider | Gemini 2.5 Flash (Claude integration ready) |
 | Routing | React Router v6 |
 | HTTP | Axios |
 
@@ -206,15 +208,23 @@ IronSync Project/
 
 ## Screenshots
 
-> Coming soon
+### Home
+![IronSync Landing Page](screenshots/ironsync_home_page.png)
+
+### AI Workout Generator
+![Generate Workout](screenshots/ironsync_generate.png)
+
+### AI Coach
+![IronSync Coach](screenshots/ironsync_coach.png)
 
 ---
 
 ## Roadmap
 
+- [x] Firebase Firestore session tracking
+- [x] Progress dashboard with charts and analytics
+- [x] Mobile responsive layout
 - [ ] Firebase authentication
-- [ ] Workout history persistence (Firestore)
 - [ ] Claude API integration (stub ready)
-- [ ] Progress charts (Chart.js)
 - [ ] Export workouts to PDF
 - [ ] Mobile app (React Native)
