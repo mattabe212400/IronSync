@@ -2,9 +2,19 @@
 
 **Full-stack AI fitness agent** — generate personalized workout plans, chat with a multi-agent AI coach, and track your training progress.
 
-Built as a portfolio project demonstrating agent architecture, structured AI outputs, Firebase integration, and a mobile-responsive dark UI.
-
 **Live demo:** [iron-sync.vercel.app](https://iron-sync.vercel.app)
+
+---
+
+## Origin
+
+IronSync started as two separate academic projects during my sophomore year at Iowa State University.
+
+In **ENTSP 3100 (Entrepreneurship & Innovation)**, my group conducted a full feasibility assessment on the idea — validating the problem, sizing the market, and evaluating whether an AI-powered fitness agent was worth building.
+
+In **MIS 3100 (Information Systems Analysis)**, I designed the system architecture and built Figma wireframes demonstrating how the platform would work end to end — user flows, data flows, and interface layouts.
+
+After completing both courses, I decided to stop presenting the idea and actually build it. IronSync is the working MVP of what started on a whiteboard in those two classes.
 
 ---
 
