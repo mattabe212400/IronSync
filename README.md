@@ -10,12 +10,14 @@ Built as a portfolio project demonstrating agent architecture, structured AI out
 
 ## Features
 
+- **Google Authentication** — Firebase Auth with Google sign-in; each user's data is isolated by UID
 - **AI Workout Generator** — 4-step form generates a full weekly training program via Gemini AI
 - **AI Coach Chat** — conversational interface with 4 specialized agents routing by intent
 - **Exercise Swap Agent** — replaces exercises while preserving movement patterns
 - **Recovery Agent** — modifies workouts around soreness, injury, or fatigue
 - **Progression Agent** — prescribes specific load/rep increases based on completion
-- **Progress Dashboard** — weekly streak tracker and fitness metrics overview
+- **Progress Dashboard** — weekly streak tracker, muscle volume charts, and split balance analytics
+- **Session Tracker** — log completed workouts stored in Firebase Firestore per user
 - **JSON Validation Layer** — every AI response sanitized before reaching the frontend
 - **Modular AI Provider** — swap between Gemini, Claude, or mock data with one env variable
 
@@ -28,6 +30,8 @@ Built as a portfolio project demonstrating agent architecture, structured AI out
 | Frontend | React 18, Vite, Tailwind CSS v4 |
 | Backend | Node.js, Express |
 | AI Provider | Gemini 2.5 Flash (Claude integration ready) |
+| Auth | Firebase Authentication (Google sign-in) |
+| Database | Firebase Firestore |
 | Routing | React Router v6 |
 | HTTP | Axios |
 
@@ -221,10 +225,10 @@ IronSync Project/
 
 ## Roadmap
 
-- [x] Firebase Firestore session tracking
+- [x] Firebase Authentication (Google sign-in)
+- [x] Firebase Firestore session tracking per user
 - [x] Progress dashboard with charts and analytics
 - [x] Mobile responsive layout
-- [ ] Firebase authentication
 - [ ] Claude API integration (stub ready)
 - [ ] Export workouts to PDF
 - [ ] Mobile app (React Native)
